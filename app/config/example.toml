@@ -1,0 +1,37 @@
+reminder_interval = "3h"
+
+[alerts]
+    [alerts.test-alert-1]
+    query = """
+        SELECT *
+        FROM test
+        WHERE something > 2
+    """
+    message = "Something is broken"
+    dbs = ["my-postgres-db"]
+    destinations = ["slack.my-slack"]
+    interval = "60s"
+    reminder_interval = "1h"
+
+    [alerts.test-alert-2]
+    query = "SELECT * FROM test"
+    message = "Something is broken"
+    dbs = ["my-mysql-db"]
+    destinations = ["slack.my-slack"]
+    interval = "1h30m"
+
+
+[dbs]
+    [dbs.my-postgres-db]
+    driver = "postgres"
+    connection = "${TEST_POSTGRES_CONNECTION}"
+
+
+    [dbs.my-mysql-db]
+    driver = "mysql"
+    connection = "${TEST_MYSQL_CONNECTION}"
+
+
+[slacks]
+    [slacks.my-slack]
+    webhook_url = "https://slack.com/something"

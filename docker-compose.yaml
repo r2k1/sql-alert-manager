@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+  postgresdb:
+    image: postgres:11-alpine
+    restart: always
+  mysqldb:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+  test:
+    depends_on:
+      - postgresdb
+      - mysqldb
+    image: golang:1.13
+    working_dir: /src
+    volumes:
+      - "$PWD:/src"
+      - "go-modules:/go/pkg/mod"
+    entrypoint: go test ./...
+    environment:
+      TEST_POSTGRES_CONNECTION: postgres://postgresdb:5432/postgres?user=postgres&sslmode=disable
+      TEST_MYSQL_CONNECTION: root:@(mysqldb)/mysql
+volumes:
+  go-modules:
