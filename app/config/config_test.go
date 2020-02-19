@@ -13,6 +13,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	// set env variable for substitution in config file
 	_ = os.Setenv("TEST_POSTGRES_CONNECTION", sqltest.TestPostgresConnection)
 	_ = os.Setenv("TEST_MYSQL_CONNECTION", sqltest.TestMysqlConnection)
 	os.Exit(m.Run())

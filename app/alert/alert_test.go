@@ -1,7 +1,6 @@
 package alert
 
 import (
-	"database/sql"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -17,8 +16,7 @@ import (
 //go:generate  mockery -name Destination -inpkg
 
 func TestAlert_ExecQuery_Postgres(t *testing.T) {
-	postgres, err := sql.Open("postgres", sqltest.TestPostgresConnection)
-	require.NoError(t, err)
+	postgres := sqltest.GetTestPostgres()
 	a := Alert{
 		Source: NewSource(postgres, "test"),
 		Query: `
@@ -35,11 +33,10 @@ func TestAlert_ExecQuery_Postgres(t *testing.T) {
 }
 
 func TestAlert_ExecQuery_Mysql(t *testing.T) {
-	postgres, err := sql.Open("mysql", sqltest.TestMysqlConnection)
-	require.NoError(t, err)
+	mysql := sqltest.GetTestMysql()
 	a := Alert{
 		Name:   "my_alert",
-		Source: NewSource(postgres, "test"),
+		Source: NewSource(mysql, "test"),
 		Query: `
 			SELECT 1 as col1, 'string' as col2
 			UNION ALL
@@ -56,11 +53,10 @@ func TestAlert_ExecQuery_Mysql(t *testing.T) {
 func TestAlert_Check(t *testing.T) {
 	d := new(MockDestination)
 	d.On("SendAlert", mock.Anything, mock.Anything).Return(nil)
-	postgres, err := sql.Open("mysql", sqltest.TestMysqlConnection)
-	require.NoError(t, err)
+	mysql := sqltest.GetTestMysql()
 	a := Alert{
 		Name:         "my_alert",
-		Source:       NewSource(postgres, "test"),
+		Source:       NewSource(mysql, "test"),
 		Destinations: []Destination{d},
 		Query: `
 			SELECT 1 as col1, 'string' as col2

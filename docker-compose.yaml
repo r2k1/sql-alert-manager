@@ -3,6 +3,9 @@ services:
   postgresdb:
     image: postgres:11-alpine
     restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test_password
   mysqldb:
     image: mysql:8
     restart: always
@@ -16,10 +19,7 @@ services:
     working_dir: /src
     volumes:
       - "$PWD:/src"
-      - "go-modules:/go/pkg/mod"
     entrypoint: go test ./...
     environment:
-      TEST_POSTGRES_CONNECTION: postgres://postgresdb:5432/postgres?user=postgres&sslmode=disable
+      TEST_POSTGRES_CONNECTION: postgres://postgresdb:5432/postgres?user=postgres&password=test_password&sslmode=disable
       TEST_MYSQL_CONNECTION: root:@(mysqldb)/mysql
-volumes:
-  go-modules:
