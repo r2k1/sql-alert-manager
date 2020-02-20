@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: docker-compose run test
+  publish-docker-image:
+    needs: test
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set version
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:11} # converts "refs/tags/v0.0.0" => "0.0.0"
+      - name: Print version
+        run: echo ${RELEASE_VERSION}
+      - name: Docker build
+        run: docker build -t app .
+      - name: Docker login
+        run: docker login docker.pkg.github.com -u ${{github.actor}} -p ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker push release
+        run: |
+          docker tag app docker.pkg.github.com/r2k1/sql-alert-manager/app:${RELEASE_VERSION}
+          docker push docker.pkg.github.com/r2k1/sql-alert-manager/app:${RELEASE_VERSION}
+          docker tag app docker.pkg.github.com/r2k1/sql-alert-manager/app:latest
+          docker push docker.pkg.github.com/r2k1/sql-alert-manager/app:latest
