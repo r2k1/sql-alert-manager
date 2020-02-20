@@ -21,5 +21,6 @@ services:
       - "$PWD:/src"
     entrypoint: go test ./...
     environment:
+      GOFLAGS: -mod=vendor
       TEST_POSTGRES_CONNECTION: postgres://postgresdb:5432/postgres?user=postgres&password=test_password&sslmode=disable
       TEST_MYSQL_CONNECTION: root:@(mysqldb)/mysql
