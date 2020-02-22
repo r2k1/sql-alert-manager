@@ -23,11 +23,10 @@ jobs:
         run: echo ${RELEASE_VERSION}
       - name: Docker build
         run: docker build -t app .
-      - name: Docker login
-        run: docker login docker.pkg.github.com -u ${{github.actor}} -p ${{ secrets.GITHUB_TOKEN }}
       - name: Docker push release
         run: |
-          docker tag app docker.pkg.github.com/r2k1/sql-alert-manager/app:${RELEASE_VERSION}
-          docker push docker.pkg.github.com/r2k1/sql-alert-manager/app:${RELEASE_VERSION}
-          docker tag app docker.pkg.github.com/r2k1/sql-alert-manager/app:latest
-          docker push docker.pkg.github.com/r2k1/sql-alert-manager/app:latest
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker tag app r2k1/sql-alert-manager:${RELEASE_VERSION}
+          docker push r2k1/sql-alert-manager:${RELEASE_VERSION}
+          docker tag app r2k1/sql-alert-manager:latest
+          docker push r2k1/sql-alert-manager:latest
