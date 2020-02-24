@@ -13,6 +13,7 @@ import (
 func main() {
 	var configPath string
 	flag.StringVar(&configPath, "config", "config.toml", "path to configuration file")
+	flag.Parse()
 	alerts, err := config.LoadAlerts(configPath)
 	if err != nil {
 		log.Fatalf("FATAL: error during loading configuration file %s: %s", configPath, err)
