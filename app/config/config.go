@@ -140,7 +140,7 @@ func prepareAlerts(config tomlConfig) ([]alert.Alert, error) {
 func prepareDestinations(config tomlConfig) (map[string]alert.Destination, error) {
 	destinations := make(map[string]alert.Destination)
 	for name, slackConf := range config.Slack {
-		destinations["slack."+name] = alert.NewSlack(name, slackConf.WebhookURL)
+		destinations["slacks."+name] = alert.NewSlack(name, slackConf.WebhookURL)
 	}
 	return destinations, nil
 }

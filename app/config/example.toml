@@ -9,7 +9,7 @@ reminder_interval = "3h"
     """
     message = "Something is broken"
     dbs = ["my-postgres-db"]
-    destinations = ["slack.my-slack"]
+    destinations = ["slacks.my-slack"]
     interval = "60s"
     reminder_interval = "1h"
 
@@ -17,7 +17,7 @@ reminder_interval = "3h"
     query = "SELECT * FROM test"
     message = "Something is broken"
     dbs = ["my-mysql-db"]
-    destinations = ["slack.my-slack"]
+    destinations = ["slacks.my-slack"]
     interval = "1h30m"
 
 
