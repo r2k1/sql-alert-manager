@@ -93,6 +93,7 @@ func (a *Alert) Worker() {
 }
 
 func (a *Alert) Check() {
+	log.Printf("INFO: checking %s alert", a.Name)
 	msg, err := a.ExecQuery()
 	if err != nil {
 		LogError(fmt.Errorf("couldn't check conditions for %s: %s", a.Name, err))
