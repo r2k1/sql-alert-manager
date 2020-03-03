@@ -93,13 +93,13 @@ func (a *Alert) Worker() {
 }
 
 func (a *Alert) Check() {
-	log.Printf("INFO: checking %s alert", a.Name)
 	msg, err := a.ExecQuery()
 	if err != nil {
 		LogError(fmt.Errorf("couldn't check conditions for %s: %s", a.Name, err))
 		return
 	}
 	if msg == "" {
+		log.Printf("INFO: %s is OK", a.Name)
 		if !a.AlertingAt.IsZero() {
 			log.Printf("INFO: %s is resolved", a.Name)
 			a.Resolve(fmt.Sprintf("Resolved after %s", humanizeDuration(time.Now().Sub(a.AlertingAt))))
