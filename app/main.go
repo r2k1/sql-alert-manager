@@ -12,7 +12,7 @@ import (
 func main() {
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
-		log.Fatal("CONFIG_PATH environment variable is not specified")
+		log.Fatal("FATAL: CONFIG_PATH environment variable is not specified")
 	}
 	alerts, err := config.LoadAlerts(configPath)
 	if err != nil {
