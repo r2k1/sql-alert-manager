@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -11,9 +10,10 @@ import (
 )
 
 func main() {
-	var configPath string
-	flag.StringVar(&configPath, "config", "config.toml", "path to configuration file")
-	flag.Parse()
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		log.Fatal("CONFIG_PATH environment variable is not specified")
+	}
 	alerts, err := config.LoadAlerts(configPath)
 	if err != nil {
 		log.Fatalf("FATAL: error during loading configuration file %s: %s", configPath, err)
