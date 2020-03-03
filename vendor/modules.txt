@@ -1,5 +1,8 @@
 # github.com/BurntSushi/toml v0.3.1
 github.com/BurntSushi/toml
+# github.com/a8m/envsubst v1.1.0
+github.com/a8m/envsubst
+github.com/a8m/envsubst/parse
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
 # github.com/go-sql-driver/mysql v1.5.0

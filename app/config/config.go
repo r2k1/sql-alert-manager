@@ -10,6 +10,8 @@ import (
 	"github.com/r2k1/sql-alert-manager/app/alert"
 
 	"github.com/BurntSushi/toml"
+	"github.com/a8m/envsubst"
+
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 )
@@ -76,9 +78,12 @@ func loadTOMLConfig(path string) (tomlConfig, error) {
 
 // split from ParseConfigFile for testing purposes
 func parseConfig(input []byte) (tomlConfig, error) {
-	inputWithENV := os.ExpandEnv(string(input))
 	var c tomlConfig
-	err := toml.Unmarshal([]byte(inputWithENV), &c)
+	inputWithENV, err := envsubst.String(string(input))
+	if err != nil {
+		return c, fmt.Errorf("error during env substition: %w", err)
+	}
+	err = toml.Unmarshal([]byte(inputWithENV), &c)
 	if err != nil {
 		return c, fmt.Errorf("error parsing TOML: %w", err)
 	}
