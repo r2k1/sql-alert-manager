@@ -123,7 +123,7 @@ func prepareAlerts(config tomlConfig) ([]alert.Alert, error) {
 			}
 
 			alerts = append(alerts, alert.Alert{
-				Name:             alertName,
+				Name:             fmt.Sprintf("%s (%s)", alertName, dbName),
 				Message:          alertConfig.Message,
 				Source:           alert.NewSource(db, dbName),
 				Query:            alertConfig.Query,
