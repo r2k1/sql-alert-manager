@@ -1,11 +1,13 @@
 package alert
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"log"
-	"strings"
 	"time"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 type Alert struct {
@@ -38,7 +40,8 @@ func NewSource(db *sql.DB, name string) *Source {
 }
 
 func (a *Alert) ExecQuery() (string, error) {
-	var sb strings.Builder
+	buff := bytes.NewBufferString("")
+	table := tablewriter.NewWriter(buff)
 	rows, err := a.Source.db.Query(a.Query)
 	if err != nil {
 		return "", fmt.Errorf("couldn't execute sql query: %w", err)
@@ -47,16 +50,8 @@ func (a *Alert) ExecQuery() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error during fetching list of columns: %w", err)
 	}
-	isFirst := true
-	for i := range cols {
-		if !isFirst {
-			sb.WriteString("\t")
-		}
-		sb.WriteString(cols[i])
-		isFirst = false
-	}
-	sb.WriteString("\n")
-	dataStr := make([][]byte, len(cols))
+	table.SetHeader(cols)
+	dataStr := make([]string, len(cols))
 	data := make([]interface{}, len(cols))
 	for i := range data {
 		data[i] = &dataStr[i]
@@ -69,20 +64,13 @@ func (a *Alert) ExecQuery() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		isFirst = true
-		for i := range dataStr {
-			if !isFirst {
-				sb.WriteString("\t")
-			}
-			sb.Write(dataStr[i])
-			isFirst = false
-		}
-		sb.WriteString("\n")
+		table.Append(dataStr)
 	}
 	if !hasRows {
 		return "", nil
 	}
-	return sb.String(), nil
+	table.Render()
+	return buff.String(), nil
 }
 
 func (a *Alert) Worker() {

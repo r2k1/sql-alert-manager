@@ -11,6 +11,10 @@ github.com/go-sql-driver/mysql
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
+# github.com/mattn/go-runewidth v0.0.7
+github.com/mattn/go-runewidth
+# github.com/olekukonko/tablewriter v0.0.4
+github.com/olekukonko/tablewriter
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/objx v0.1.1

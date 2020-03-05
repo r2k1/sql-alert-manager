@@ -18,6 +18,7 @@ type Slack struct {
 }
 
 type SlackWebhookRequest struct {
+	Text        string            `json:"text"`
 	Attachments []SlackAttachment `json:"attachments"`
 }
 
@@ -45,12 +46,12 @@ func NewSlack(name, webhook string) *Slack {
 	}
 }
 
-func (s *Slack) SendAlert(alert *Alert, message string) error {
+func (s *Slack) SendAlert(alert *Alert, data string) error {
 	return s.sendMessage(SlackWebhookRequest{
 		Attachments: []SlackAttachment{
 			{
 				Color: "#D5212E",
-				Text:  fmt.Sprintf("[ALERT] :exclamation: %s\n%s\n%s", alert.Name, alert.Message, message),
+				Text:  fmt.Sprintf("[ALERT] :exclamation: %s\n%s\n%s", alert.Name, alert.Message, data),
 			},
 		},
 	})
