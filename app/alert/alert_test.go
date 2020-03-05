@@ -1,6 +1,7 @@
 package alert
 
 import (
+	"strings"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -26,10 +27,15 @@ func TestAlert_ExecQuery_Postgres(t *testing.T) {
 	}
 	res, err := a.ExecQuery()
 	require.NoError(t, err)
-	assert.Equal(t, `col1	col2	col3
-1	string	{{meeting,lunch},{training,presentation}}
-2	string2	{test}
-`, res)
+	assertTables(t, `
++------+---------+-------------------------------------------+
+| COL1 |  COL2   |                   COL3                    |
++------+---------+-------------------------------------------+
+|    1 | string  | {{meeting,lunch},{training,presentation}} |
+|    2 | string2 | {test}                                    |
++------+---------+-------------------------------------------+
+`,
+		res)
 }
 
 func TestAlert_ExecQuery_Mysql(t *testing.T) {
@@ -44,10 +50,15 @@ func TestAlert_ExecQuery_Mysql(t *testing.T) {
 	}
 	res, err := a.ExecQuery()
 	require.NoError(t, err)
-	assert.Equal(t, `col1	col2
-1	string
-2	string2
-`, res)
+	assertTables(t, `
++------+---------+
+| COL1 |  COL2   |
++------+---------+
+|    1 | string  |
+|    2 | string2 |
++------+---------+
+`,
+		res)
 }
 
 func TestAlert_Check(t *testing.T) {
@@ -68,4 +79,10 @@ func TestAlert_Check(t *testing.T) {
 	a.Check()
 	a.Check()
 	d.AssertNumberOfCalls(t, "SendAlert", 1)
+}
+
+func assertTables(t *testing.T, actual string, expected string) {
+	actual = strings.TrimPrefix(actual, " ")
+	expected = strings.TrimPrefix(actual, " ")
+	assert.Equal(t, actual, expected)
 }

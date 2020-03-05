@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var TestPostgresConnection = LoadEnv("TEST_POSTGRES_CONNECTION", "postgres://localhost:5432/postgres?user=postgres&sslmode=disable")
+var TestPostgresConnection = LoadEnv("TEST_POSTGRES_CONNECTION", "postgres://localhost:5432/postgres?user=postgres&password=test_password&sslmode=disable")
 var TestMysqlConnection = LoadEnv("TEST_MYSQL_CONNECTION", "root@/mysql")
 
 func LoadEnv(key, fallback string) string {
