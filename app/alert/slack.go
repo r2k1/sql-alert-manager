@@ -17,28 +17,6 @@ type Slack struct {
 	webhookURL string
 }
 
-type SlackWebhookRequest struct {
-	Text        string            `json:"text"`
-	Attachments []SlackAttachment `json:"attachments"`
-}
-
-type SlackAttachment struct {
-	Color      string `json:"color"`
-	AuthorName string `json:"author_name"`
-	AuthorLink string `json:"author_link"`
-	AuthorIcon string `json:"author_icon"`
-	Title      string `json:"title"`
-	TitleLink  string `json:"title_link"`
-	Text       string `json:"text"`
-	Pretext    string `json:"pretext"`
-	Footer     string `json:"footer"`
-	ImageURL   string `json:"image_url"`
-	ThumbURL   string `json:"thumb_url"`
-	FooterIcon string `json:"footer_icon"`
-	Timestamp  int64  `json:"ts"`
-	Fallback   string `json:"fallback"`
-}
-
 func NewSlack(name, webhook string) *Slack {
 	return &Slack{
 		name:       name,
@@ -47,33 +25,54 @@ func NewSlack(name, webhook string) *Slack {
 }
 
 func (s *Slack) SendAlert(alert *Alert, data string) error {
-	return s.sendMessage(SlackWebhookRequest{
-		Attachments: []SlackAttachment{
-			{
-				Color: "#D5212E",
-				Text:  fmt.Sprintf("[ALERT] :exclamation: %s\n%s\n%s", alert.Name, alert.Message, data),
+	request := map[string]interface{}{
+		"blocks": []interface{}{
+			map[string]interface{}{
+				"type": "section",
+				"text": map[string]interface{}{
+					"type": "plain_text",
+					"text": fmt.Sprintf("[ALERT] :exclamation: %s\n%s", alert.Name, alert.Message),
+					"emoji": true,
+				},
+			},
+			map[string]interface{}{
+				"type": "context",
+				"elements": []interface{}{
+					map[string]interface{}{
+						"type": "mrkdwn",
+						"text": fmt.Sprintf("```%s```", data),
+					},
+				},
 			},
 		},
-	})
+	}
+
+	return s.sendMessage(request)
 
 }
 
 func (s *Slack) ResolveAlert(alert *Alert, message string) error {
-	return s.sendMessage(SlackWebhookRequest{
-		Attachments: []SlackAttachment{
-			{
-				Color: "#3bb143",
-				Text:  fmt.Sprintf("[RESOLVED] :tick: %s\n%s", alert.Name, message),
+	request := map[string]interface{}{
+		"blocks": []interface{}{
+			map[string]interface{}{
+				"type": "section",
+				"text": map[string]interface{}{
+					"type": "plain_text",
+					"text": fmt.Sprintf("[RESOLVED] :tick: %s\n%s", alert.Name, message),
+					"emoji": true,
+				},
 			},
 		},
-	})
+	}
+
+	return s.sendMessage(request)
 }
 
 func (s *Slack) Name() string {
 	return s.name
 }
 
-func (s *Slack) sendMessage(r SlackWebhookRequest) error {
+func (s *Slack) sendMessage(r interface{}) error {
 	req, err := json.Marshal(r)
 	if err != nil {
 		return fmt.Errorf("couldn't prepare slack webhook request")
