@@ -31,6 +31,7 @@ type tomlAlert struct {
 	Interval         tomlDuration `toml:"interval"`
 	ReminderInterval tomlDuration `toml:"reminder_interval"`
 	Message          string       `toml:"message"`
+	AlertOnError     *bool        `toml:"alert_on_error"` // can hold 3 possible values: true/false/not-specified
 }
 
 type tomlDuration struct {
@@ -62,6 +63,7 @@ type tomlConfig struct {
 	PagerDuty        map[string]tomlPagerDuty `toml:"pager_duties"`
 	Message          string                   `toml:"message"`
 	ReminderInterval tomlDuration             `toml:"reminder_interval"`
+	AlertOnError     *bool                     `toml:"alert_on_error"` // can hold 3 possible values: true/false/not-specified
 }
 
 func loadTOMLConfig(path string) (tomlConfig, error) {
@@ -102,6 +104,16 @@ func prepareAlerts(config tomlConfig) ([]alert.Alert, error) {
 	}
 
 	for alertName, alertConfig := range config.Alerts {
+		var alertOnError bool
+		if alertConfig.AlertOnError == nil {
+			if config.AlertOnError == nil {
+				alertOnError = true
+			} else {
+				alertOnError = *config.AlertOnError
+			}
+		} else {
+			alertOnError = *alertConfig.AlertOnError
+		}
 		reminderInterval := alertConfig.ReminderInterval.Duration
 		if reminderInterval == 0 {
 			reminderInterval = config.ReminderInterval.Duration
@@ -130,6 +142,7 @@ func prepareAlerts(config tomlConfig) ([]alert.Alert, error) {
 				Interval:         alertConfig.Interval.Duration,
 				ReminderInterval: reminderInterval,
 				Destinations:     alertDestinations,
+				AlertOnError:     alertOnError,
 			})
 		}
 	}

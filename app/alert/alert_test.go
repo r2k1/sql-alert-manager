@@ -3,6 +3,7 @@ package alert
 import (
 	"strings"
 	"testing"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -64,7 +65,7 @@ func TestAlert_ExecQuery_Mysql(t *testing.T) {
 func TestAlert_Check(t *testing.T) {
 	d := new(MockDestination)
 	d.On("SendAlert", mock.Anything, mock.Anything).Return(nil)
-	mysql := sqltest.GetTestMysql()
+	mysql := sqltest.GetTestPostgres()
 	a := Alert{
 		Name:         "my_alert",
 		Source:       NewSource(mysql, "test"),
@@ -75,10 +76,55 @@ func TestAlert_Check(t *testing.T) {
 			SELECT 2 as col1, 'string2' as col2`,
 	}
 	a.Check()
+	assert.NotEqual(t, a.LastAlertSentAt, time.Time{})
+	assert.NotEqual(t, a.AlertingAt, time.Time{})
 	d.AssertNumberOfCalls(t, "SendAlert", 1)
 	a.Check()
 	a.Check()
 	d.AssertNumberOfCalls(t, "SendAlert", 1)
+}
+
+func TestAlert_Check_Error(t *testing.T) {
+	d := new(MockDestination)
+	d.On("SendAlert", mock.Anything, mock.Anything).Return(nil)
+	mysql := sqltest.GetTestPostgres()
+	a := Alert{
+		Name:         "my_alert",
+		Source:       NewSource(mysql, "test"),
+		Destinations: []Destination{d},
+		AlertOnError: false,
+		Query: `
+			SELECT 1 as col1, 'string' as col2 FROM`, // invalid query
+	}
+	a.Check()
+	d.AssertNumberOfCalls(t, "SendAlert", 0)
+	a.AlertOnError = true
+	a.Check()
+	assert.NotEqual(t, a.LastAlertSentAt, time.Time{})
+	assert.NotEqual(t, a.AlertingAt, time.Time{})
+	d.AssertNumberOfCalls(t, "SendAlert", 1)
+}
+
+
+func TestAlert_Reminder(t *testing.T) {
+	d := new(MockDestination)
+	d.On("SendAlert", mock.Anything, mock.Anything).Return(nil)
+	mysql := sqltest.GetTestPostgres()
+	a := Alert{
+		Name:         "my_alert",
+		Source:       NewSource(mysql, "test"),
+		Destinations: []Destination{d},
+		ReminderInterval: time.Millisecond,
+		Query: `
+			SELECT 1 as col1, 'string' as col2`,
+	}
+	a.Check()
+	d.AssertNumberOfCalls(t, "SendAlert", 1)
+	a.Check()
+	d.AssertNumberOfCalls(t, "SendAlert", 1)
+	time.Sleep(time.Millisecond)
+	a.Check()
+	d.AssertNumberOfCalls(t, "SendAlert", 2)
 }
 
 func assertTables(t *testing.T, actual string, expected string) {
