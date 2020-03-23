@@ -106,7 +106,9 @@ func prepareAlerts(config tomlConfig) ([]alert.Alert, error) {
 	for alertName, alertConfig := range config.Alerts {
 		var alertOnError bool
 		if alertConfig.AlertOnError == nil {
+			// use global configuration if not specified
 			if config.AlertOnError == nil {
+				// use default value if global not specified
 				alertOnError = true
 			} else {
 				alertOnError = *config.AlertOnError

@@ -62,14 +62,15 @@ alert_on_error = false
 
 
 Configuration is defined in [TOML](https://github.com/toml-lang/toml) format.
-- `reminder_interval` - Optional. Default interval for all alerts after which alert will be triggered again. Set to 0 if you don't need reminders. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". Examples: "300s", "1.5h" or "2h45m". Default value is 0.
-- `alert_on_error` - Option. Defines behavior during error encounters (connection errors, sql syntax errors, timeouts etc ). If set to true any error will trigger an alert. If set to false then error will be logged and ignored. Default value is true.
-- `alerts.{alert-name}.reminder_interval` - Optional. Same as above, but for individual alert.
+- `reminder_interval` - Optional. Default interval for all alerts after which alert will be triggered again. Set to 0 if you don't need reminders. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". Examples: "300s", "1.5h" or "2h45m". Default: `0`.
+- `alert_on_error` - Optional. Defines behavior during error encounters (connection errors, sql syntax errors, timeouts etc ). If set to true any error will trigger an alert. If set to false then error will be logged and ignored. Default: `true`.
 - `alerts.{alert-name}.query` - Required. SQL query to execute at regular interval.
-- `alerts.{alert-name}.message` - Optional. Message to pass with alert.
 - `alerts.{alert-name}.dbs` - Required. List of database references. Provided query will be executed against each database and trigger an individual alert for each database. All databases must be defined in `dbs` section of the configuration. Example: `["my-postgres-db", "my-mysql-db"]`.
 - `alerts.{alert-name}.destinations` - Required. List of destination references to report the alert. Each destination should be defined in related section. Example: `["slacks.channel-1-webhook", "slacks.channel-2-webhook"]`
 - `alerts.{alert-name}.interval` - Required. An interval between consecutive query execution. For simplicity it does not take in account time required to execute the query. For example if query execution time is 5s and interval is 10s then interval between two consecutive queries will be 15s. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". Examples: "300s", "1.5h" or "2h45m"
+- `alerts.{alert-name}.message` - Optional. Message to pass with alert.
+- `alerts.{alert-name}.reminder_interval` - Optional. Uses global `reminder_interval` if not specified.
+- `alerts.{alert-name}.alert_on_error` - Optional. Uses global `alert_on_error` if not specified.
 - `dbs.{db-name}.driver` - Required. SQL driver. Supported drivers: mysql, postgres.
 - `dbs.{db-name}.connection` - Required. Connection string for the database. Documentation for databases: [postgres](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING), [mysql](https://github.com/go-sql-driver/mysql#dsn-data-source-name).
 - `slacks.{destination-name}.webhook_url` - Required. Webhook URL for slack integration. More information how to set it up in [official slack documentation](https://api.slack.com/messaging/webhooks).
