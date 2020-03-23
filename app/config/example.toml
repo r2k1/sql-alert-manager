@@ -1,4 +1,5 @@
 reminder_interval = "3h"
+alert_on_error = true
 
 [alerts]
     [alerts.test-alert-1]
@@ -19,6 +20,7 @@ reminder_interval = "3h"
     dbs = ["my-mysql-db"]
     destinations = ["slacks.my-slack"]
     interval = "1h30m"
+    alert_on_error = false
 
 
 [dbs]

@@ -22,7 +22,10 @@ func TestMain(m *testing.M) {
 func Test_loadTOMLConfig(t *testing.T) {
 	config, err := loadTOMLConfig("example.toml")
 	require.NoError(t, err)
+	falseB := false
+	trueB := true
 	expected := tomlConfig{
+		AlertOnError: &trueB,
 		ReminderInterval: tomlDuration{Duration: 3 * time.Hour},
 		Alerts: map[string]tomlAlert{
 			"test-alert-1": {
@@ -40,6 +43,7 @@ func Test_loadTOMLConfig(t *testing.T) {
 				Destinations:     []string{"slacks.my-slack"},
 				Interval:         tomlDuration{Duration: time.Minute * 90},
 				ReminderInterval: tomlDuration{Duration: 0},
+				AlertOnError:     &falseB,
 			},
 		},
 		DB: map[string]tomlDB{

@@ -17,6 +17,8 @@ type Alert struct {
 	Interval         time.Duration
 	ReminderInterval time.Duration
 	AlertingAt       time.Time
+	LastAlertSentAt  time.Time
+	AlertOnError     bool
 }
 
 type Destination interface {
@@ -96,46 +98,51 @@ func (a *Alert) Check() {
 	msg, err := a.ExecQuery()
 	if err != nil {
 		LogError(fmt.Errorf("couldn't check conditions for %s: %s", a.Name, err))
-		return
-	}
-	if msg == "" {
-		log.Printf("INFO: %s is OK", a.Name)
-		if !a.AlertingAt.IsZero() {
-			log.Printf("INFO: %s is resolved", a.Name)
-			a.Resolve(fmt.Sprintf("Resolved after %s", humanizeDuration(time.Now().Sub(a.AlertingAt))))
-			a.AlertingAt = time.Time{}
+		if a.AlertOnError {
+			a.SendAlert(err.Error())
 		}
 		return
 	}
-	log.Printf("INFO: %s is alerting", a.Name)
-	if a.AlertingAt.IsZero() {
-		a.AlertingAt = time.Now()
-		a.SendAlert(msg)
-	} else if a.ReminderInterval > 0 && time.Now().Sub(a.AlertingAt) > a.ReminderInterval {
-		a.SendAlert(msg)
+	if msg == "" {
+		a.Resolve()
+		return
 	}
+	a.SendAlert(msg)
 
 }
 
 func (a *Alert) SendAlert(msg string) {
-	if !a.AlertingAt.IsZero() {
+	log.Printf("INFO: %s is alerting", a.Name)
+	if a.AlertingAt.IsZero() {
 		a.AlertingAt = time.Now()
 	}
-	for i := range a.Destinations {
-		err := a.Destinations[i].SendAlert(a, msg)
-		if err != nil {
-			LogError(fmt.Errorf("couldn't send alert %s to %s", a.Name, a.Destinations[i].Name()))
+	if a.LastAlertSentAt.IsZero() || (a.ReminderInterval > 0 && time.Since(a.LastAlertSentAt) > a.ReminderInterval) {
+		for i := range a.Destinations {
+			err := a.Destinations[i].SendAlert(a, msg)
+			if err != nil {
+				LogError(fmt.Errorf("couldn't send alert %s to %s", a.Name, a.Destinations[i].Name()))
+			}
 		}
+		a.LastAlertSentAt = time.Now()
 	}
 }
 
-func (a *Alert) Resolve(msg string) {
+func (a *Alert) Resolve() {
+	log.Printf("INFO: %s is OK", a.Name)
+	if a.AlertingAt.IsZero() {
+		return
+	}
+	alertDuration := humanizeDuration(time.Now().Sub(a.AlertingAt))
+	resolveMessage := fmt.Sprintf("Resolved after %s", alertDuration)
 	for i := range a.Destinations {
-		err := a.Destinations[i].ResolveAlert(a, msg)
+		err := a.Destinations[i].ResolveAlert(a, resolveMessage)
 		if err != nil {
 			LogError(fmt.Errorf("error during resolver alert %s to %s", a.Name, a.Destinations))
 		}
 	}
+	a.AlertingAt = time.Time{}
+	a.LastAlertSentAt = time.Time{}
+	log.Printf("INFO: %s is resolved after %s", a.Name, alertDuration)
 }
 
 func LogError(err error) {
